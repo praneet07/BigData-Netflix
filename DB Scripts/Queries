@@ -1,0 +1,44 @@
+"""
+	@Author: Rohan Ingale
+	This file contains the queries required to fetch the data from imdb and join with the netflix data
+"""
+
+//to select the movies from imdb dataset having kind as anything other than episode and games
+create view netflixmovies as (select t.id as NetflixID, t.title, t.production_year, t.imdb_id, k.kind from title where title.kind_id = kind_type.id and kind_type.id <=5)
+
+//to join the imdb movie data with the movie genre.
+create view moviegenre as select n.NetflixID, n.title, n.production_year, n.imdb_id, m.info from netflixmovies n, movie_info_idx m where n.imdb_id = m.id and m.info_type_id=7;
+
+//to join the movie directors with the imdb movie data
+create table netfliximdb as select n.NetflixID, m.title, m.production_year, m.imdb_id, m.info, m.name as director from moviegenre m, name n where n.id in (select Person_id from Cast_Info c where c.Movie_Id = m.imdb_id and c.role_id=8)
+
+//to connect to mongodb server on tanner
+./mongod --port 27034 --dbpath /home/ringale/data/db
+
+//to run themongodb client
+ ./mongo --port 27034
+
+
+//to import chunks of data obtained by running python code on the file containing entire data into mongodb. This was required to avoid server timeout while loading data. This command is rn for all the 10 files by just changing the file name.
+
+./mongoimport --port 27034  --db NetflixTeam1 --collection net -j 4096  --batchSize 10 --jsonArray --file jsonnetflix1.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
